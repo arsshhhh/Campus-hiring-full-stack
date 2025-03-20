@@ -1,0 +1,94 @@
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import "tailwindcss/tailwind.css";
+
+const TopUsers = () => {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/top-users")
+      .then((res) => res.json())
+      .then((data) => setUsers(data));
+  }, []);
+
+  return (
+    <div className="p-4">
+      <h1 className="text-xl font-bold">Top Users</h1>
+      {users.map((user, index) => (
+        <Card key={index} className="my-2">
+          <CardContent>{user.name} - {user.postCount} posts</CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+const TrendingPosts = () => {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/trending-posts")
+      .then((res) => res.json())
+      .then((data) => setPosts(data));
+  }, []);
+
+  return (
+    <div className="p-4">
+      <h1 className="text-xl font-bold">Trending Posts</h1>
+      {posts.map((post, index) => (
+        <Card key={index} className="my-2">
+          <CardContent>{post.content} - {post.commentCount} comments</CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+const Feed = () => {
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch("/api/feed")
+        .then((res) => res.json())
+        .then((data) => setPosts(data));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="p-4">
+      <h1 className="text-xl font-bold">Live Feed</h1>
+      {posts.map((post, index) => (
+        <Card key={index} className="my-2">
+          <CardContent>{post.content}</CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <div className="p-4">
+        <nav className="flex gap-4 mb-4">
+          <Link to="/top-users"><Button>Top Users</Button></Link>
+          <Link to="/trending-posts"><Button>Trending Posts</Button></Link>
+          <Link to="/feed"><Button>Live Feed</Button></Link>
+        </nav>
+        <Routes>
+          <Route path="/top-users" element={<TopUsers />} />
+          <Route path="/trending-posts" element={<TrendingPosts />} />
+          <Route path="/feed" element={<Feed />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+};
+
+export default App;
